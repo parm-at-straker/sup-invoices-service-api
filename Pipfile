@@ -1,0 +1,31 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[[source]]
+url = "https://mgmt-k8s-pypi-fra02.straker.io/simple"
+verify_ssl = false
+name = "straker"
+
+[packages]
+fastapi = {extras = ["all"], version = "==0.111.*"}
+python-dotenv = "==1.*"
+pydantic = "==2.*"
+pydantic-settings = "*"
+sqlalchemy = "==2.*"
+mysql-connector-python = "*"
+redis = "==5.*"
+elastic-apm = "==6.*"
+straker-utils = {version = "==0.2.1", index = "straker"}
+buglog = {version = "==0.1.4", index = "straker"}
+
+[dev-packages]
+pytest = "*"
+pytest-asyncio = "*"
+coverage = "*"
+ruff = "*"
+mypy = "*"
+
+[requires]
+python_version = "3.12"

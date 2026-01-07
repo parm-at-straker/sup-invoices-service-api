@@ -1,0 +1,27 @@
+# OS
+.DS_Store
+
+# IDE
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+
+# Environment
+.env
+.venv
+env/
+venv/
+
+# Python
+*.py[cod]
+*.log
+__pycache__/
+build/
+dist/
+*.egg-info/
+.pytest_cache/
+.coverage
+.coverage.xml
+htmlcov/
+.ruff_cache
+.mypy_cache

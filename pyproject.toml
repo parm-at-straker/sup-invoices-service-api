@@ -1,0 +1,21 @@
+[project]
+name = "straker-fastapi-template"
+version = "1.0.0"
+
+[tool.ruff]
+# https://docs.astral.sh/ruff/
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B"]
+# Never enforce `E501` (line length violations).
+ignore = ["E501"]
+
+[tool.ruff.lint.isort]
+known-local-folder = ["src"]
+known-first-party = ["straker_*", "buglog"]
+lines-after-imports = 2
+no-lines-before = ["first-party"]
+
+[tool.mypy]
+plugins = "sqlalchemy.ext.mypy.plugin"
