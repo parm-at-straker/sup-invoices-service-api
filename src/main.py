@@ -1,27 +1,33 @@
-from elasticapm.contrib.starlette import ElasticAPM, make_apm_client
 from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 import buglog
 
+try:
+    from elasticapm.contrib.starlette import ElasticAPM, make_apm_client
+    ELASTIC_APM_AVAILABLE = True
+except ImportError:
+    ELASTIC_APM_AVAILABLE = False
+
 from .config import Environment, config, domains
 from .example.router import router as example_router
 from .health.router import router as health_router
+from .invoices.router import router as invoices_router
 from .middleware import custom_validation_exception_handler
 
 
 # Configure BugLog
 buglog.init(
     listener=config.buglog_listener_url,
-    app_name="API",  # TODO
+    app_name="Invoice/Purchase Order Service API",
     # hostname=domains.,  # TODO
 )
 
 
 # Configure FastAPI
 app = FastAPI(
-    title="API",
-    description="",
+    title="Invoice/Purchase Order Service API",
+    description="Microservice for managing invoices and purchase orders",
     docs_url="/docs" if config.environment != Environment.production else None,
     redoc_url="/redoc" if config.environment != Environment.production else None,
 )
@@ -36,12 +42,13 @@ app.add_middleware(
 
 app.include_router(health_router, prefix="/health", tags=["health"])
 app.include_router(example_router, prefix="/example", tags=["example"])
+app.include_router(invoices_router, prefix="/v1", tags=["invoices"])
 
 # Configure Elastic APM
-if config.elastic_apm_server_url:
+if config.elastic_apm_server_url and ELASTIC_APM_AVAILABLE:
     apm = make_apm_client(
         {
-            "SERVICE_NAME": "",  # TODO
+            "SERVICE_NAME": "invoice-purchase-order-service-api",
             "SERVER_URL": config.elastic_apm_server_url,
             "ENVIRONMENT": config.environment.value,
             "TRANSACTION_IGNORE_URLS": ["/", "/health"],

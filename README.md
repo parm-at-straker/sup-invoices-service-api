@@ -1,6 +1,13 @@
-# Straker FastAPI Template
+# Invoice/Purchase Order Service API
 
-This repository is used for templating [FastAPI](https://fastapi.tiangolo.com/) applications in Straker. It includes features common in many of Straker's FastAPI apps, such as:
+Microservice for managing invoices and purchase orders in the Straker translation platform.
+
+This service provides REST API endpoints for:
+- Invoice management (CRUD operations, approval, payment tracking)
+- Purchase Order management (CRUD operations, approval workflow, payment processing)
+- Financial reporting and operations
+
+This repository is based on the Straker FastAPI template and includes features common in many of Straker's FastAPI apps, such as:
 
 - Environment management
 - App configuration
@@ -19,8 +26,6 @@ Be familiar with these Python libraries to develop using this template effective
 
 ## Instructions
 
-Create a new repository from this template repository or copy the files into a new repository.
-
 To run the app:
 
 1. Create a `.env` file from `.env.local` (or `.env.example`) and fill in the remaining environment variables if required:
@@ -29,17 +34,135 @@ To run the app:
    $ cp .env.local .env
    ```
 
-2. Install the dependencies listed in `Pipfile`:
+2. Set up the required environment variables. The service requires database connection settings for both `franchise` and `sitemanager` databases:
+
+   ```bash
+   # Environment
+   ENVIRONMENT=local
+
+   # Database - Franchise (primary)
+   DB_HOST_franchise=localhost
+   DB_PORT_franchise=3306
+   DB_USER_franchise=root
+   DB_PASSWORD_franchise=your_password
+
+   # Database - Franchise Read-only
+   DB_HOST_franchise_readonly=localhost
+   DB_PORT_franchise_readonly=3306
+   DB_USER_franchise_readonly=root
+   DB_PASSWORD_franchise_readonly=your_password
+
+   # Database - Sitemanager (if needed)
+   DB_HOST_sitemanager=localhost
+   DB_PORT_sitemanager=3306
+   DB_USER_sitemanager=root
+   DB_PASSWORD_sitemanager=your_password
+
+   # Database - Sitemanager Read-only
+   DB_HOST_sitemanager_readonly=localhost
+   DB_PORT_sitemanager_readonly=3306
+   DB_USER_sitemanager_readonly=root
+   DB_PASSWORD_sitemanager_readonly=your_password
+
+   # Optional: Health check password (required in production)
+   HEALTH_CHECK_PASSWORD=
+
+   # Optional: Elastic APM
+   ELASTIC_APM_SERVER_URL=
+   ```
+
+3. Install the dependencies listed in `Pipfile`:
 
    ```sh
    $ pipenv sync --dev
    ```
 
-3. Run the app:
+4. Run the app:
 
    ```sh
    $ pipenv run uvicorn src.main:app --reload --port 12345
    ```
+
+## API Endpoints
+
+### Invoices
+
+- `GET /v1/invoices` - List invoices with filtering and pagination
+- `GET /v1/invoices/{uuid}` - Get invoice by UUID
+- `POST /v1/invoices` - Create new invoice
+- `PUT /v1/invoices/{uuid}` - Update invoice
+- `DELETE /v1/invoices/{uuid}` - Delete invoice (soft delete)
+- `POST /v1/invoices/{uuid}/approve` - Approve invoice
+
+### Purchase Orders
+
+- `GET /v1/purchase-orders` - List purchase orders with filtering and pagination
+- `GET /v1/purchase-orders/{uuid}` - Get purchase order by UUID
+- `POST /v1/purchase-orders` - Create new purchase order
+- `PUT /v1/purchase-orders/{uuid}` - Update purchase order
+- `DELETE /v1/purchase-orders/{uuid}` - Delete purchase order (soft delete)
+- `POST /v1/purchase-orders/{uuid}/approve` - Approve purchase order for payment
+
+See `/docs` endpoint for interactive API documentation when running in non-production environments.
+
+## Quick Start
+
+1. **Install dependencies**:
+   ```bash
+   pipenv sync --dev
+   ```
+
+2. **Create `.env` file** with database connection settings (see [Environment Variables](#environment-variables) below)
+
+3. **Run the service**:
+   ```bash
+   pipenv run uvicorn src.main:app --reload --port 12345
+   ```
+
+4. **Access the API**:
+   - API Documentation: http://localhost:12345/docs
+   - Health Check: http://localhost:12345/health
+
+For detailed setup instructions, see [docs/RUNNING_THE_SERVICE.md](docs/RUNNING_THE_SERVICE.md).
+
+## Environment Variables
+
+The service requires the following environment variables to be set in a `.env` file:
+
+```bash
+# Required
+ENVIRONMENT=local
+
+# Database - Franchise (primary)
+DB_HOST_franchise=localhost
+DB_PORT_franchise=3306
+DB_USER_franchise=root
+DB_PASSWORD_franchise=your_password
+
+# Database - Franchise Read-only
+DB_HOST_franchise_readonly=localhost
+DB_PORT_franchise_readonly=3306
+DB_USER_franchise_readonly=root
+DB_PASSWORD_franchise_readonly=your_password
+
+# Database - Sitemanager (if needed)
+DB_HOST_sitemanager=localhost
+DB_PORT_sitemanager=3306
+DB_USER_sitemanager=root
+DB_PASSWORD_sitemanager=your_password
+
+# Database - Sitemanager Read-only
+DB_HOST_sitemanager_readonly=localhost
+DB_PORT_sitemanager_readonly=3306
+DB_USER_sitemanager_readonly=root
+DB_PASSWORD_sitemanager_readonly=your_password
+
+# Optional
+HEALTH_CHECK_PASSWORD=
+ELASTIC_APM_SERVER_URL=
+```
+
+**Note**: The `DBEnginePool` from `straker_utils` expects environment variables in the format `DB_HOST_{database_name}`, `DB_PORT_{database_name}`, etc.
 
 ## Directory Structure
 

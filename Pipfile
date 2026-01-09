@@ -19,6 +19,9 @@ redis = "==5.*"
 elastic-apm = "==6.*"
 straker-utils = {version = "==0.2.1", index = "straker"}
 buglog = {version = "==0.1.4", index = "straker"}
+aiomysql = "*"
+sniffio = "*"
+anyio = "*"
 
 [dev-packages]
 pytest = "*"
@@ -26,6 +29,9 @@ pytest-asyncio = "*"
 coverage = "*"
 ruff = "*"
 mypy = "*"
+aiosqlite = "*"
+greenlet = "*"
+httpx = "*"
 
 [requires]
 python_version = "3.12"

@@ -1,6 +1,6 @@
 services:
-  straker-fastapi-template:
-    container_name: straker-fastapi-template
+  sup-invoices-service-api:
+    container_name: sup-invoices-service-api
     build:
       context: .
     env_file:
@@ -9,7 +9,7 @@ services:
       - "12345:80"
     networks:
       local-straker:
-        ipv4_address: 172.20.0.41
+        ipv4_address: 172.20.0.47
     extra_hosts:
       local-buglog.strakergroup.com: 172.17.0.1
 
