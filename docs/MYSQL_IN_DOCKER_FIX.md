@@ -59,13 +59,13 @@ If MySQL is on `local-straker` network (as per docker-compose.yml), you might be
 
 However, since you're running the service locally (not in Docker), this won't work directly.
 
-### Solution 3: Use host.docker.internal (If MySQL Container Allows It)
+### Solution 3: Use uat-portal-db-fra02-01.straker.io (If MySQL Container Allows It)
 
-Some Docker setups allow connections via `host.docker.internal`:
+Some Docker setups allow connections via `uat-portal-db-fra02-01.straker.io`:
 
 ```bash
 # In your .env, try:
-DB_HOST_franchise=host.docker.internal
+DB_HOST_franchise=uat-portal-db-fra02-01.straker.io
 ```
 
 This tells Docker to route to the host machine, which might work if MySQL container is configured for it.

@@ -29,6 +29,7 @@ from .service import (
     PurchaseOrderService,
 )
 
+
 router = APIRouter()
 
 # Invoice Endpoints
@@ -40,7 +41,9 @@ async def list_invoices(
     job_id: Optional[int] = Query(None, description="Filter by job ID"),
     invoice_group_id: Optional[int] = Query(None, description="Filter by invoice group ID"),
     client_name: Optional[str] = Query(None, description="Filter by client name"),
-    inv_date_from: Optional[str] = Query(None, description="Filter by invoice date from (ISO format)"),
+    inv_date_from: Optional[str] = Query(
+        None, description="Filter by invoice date from (ISO format)"
+    ),
     inv_date_to: Optional[str] = Query(None, description="Filter by invoice date to (ISO format)"),
     due_date_from: Optional[str] = Query(None, description="Filter by due date from (ISO format)"),
     due_date_to: Optional[str] = Query(None, description="Filter by due date to (ISO format)"),
@@ -119,9 +122,10 @@ async def list_invoices(
 
     # Get invoices
     invoices, total = await invoice_service.list_invoices(filters)
-    
+
     # Convert dicts to InvoiceResponse objects
     from .schemas import InvoiceResponse
+
     invoice_objects = [InvoiceResponse.model_validate(inv) for inv in invoices]
 
     return InvoiceListResponse(
@@ -156,9 +160,10 @@ async def get_invoice(
         invoice_dict = await invoice_service.get_invoice(invoice_uuid)
         if not invoice_dict:
             raise InvoiceNotFoundError(f"Invoice with UUID {invoice_uuid} not found")
-        
+
         # Convert dict to InvoiceResponse object
         from .schemas import InvoiceResponse
+
         invoice = InvoiceResponse.model_validate(invoice_dict)
         return InvoiceDetailResponse(data=invoice)
     except InvoiceNotFoundError as e:
@@ -318,12 +323,16 @@ async def list_purchase_orders(
     job_id: Optional[str] = Query(None, description="Filter by job UUID"),
     translator_id: Optional[str] = Query(None, description="Filter by translator UUID"),
     project_manager_id: Optional[str] = Query(None, description="Filter by project manager UUID"),
-    order_date_from: Optional[str] = Query(None, description="Filter by order date from (ISO format)"),
+    order_date_from: Optional[str] = Query(
+        None, description="Filter by order date from (ISO format)"
+    ),
     order_date_to: Optional[str] = Query(None, description="Filter by order date to (ISO format)"),
     date_due_from: Optional[str] = Query(None, description="Filter by due date from (ISO format)"),
     date_due_to: Optional[str] = Query(None, description="Filter by due date to (ISO format)"),
     currency: Optional[str] = Query(None, description="Filter by currency"),
-    approved_for_payment: Optional[bool] = Query(None, description="Filter by approved for payment"),
+    approved_for_payment: Optional[bool] = Query(
+        None, description="Filter by approved for payment"
+    ),
     accepted: Optional[bool] = Query(None, description="Filter by accepted status"),
     page: int = Query(1, ge=1, description="Page number"),
     page_size: int = Query(25, ge=1, le=100, description="Items per page"),
@@ -442,7 +451,11 @@ async def get_purchase_order(
         ) from e
 
 
-@router.post("/purchase-orders", response_model=PurchaseOrderDetailResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/purchase-orders",
+    response_model=PurchaseOrderDetailResponse,
+    status_code=status.HTTP_201_CREATED,
+)
 async def create_purchase_order(
     po_data: PurchaseOrderCreate,
     po_service: PurchaseOrderService = Depends(get_purchase_order_service),

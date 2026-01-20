@@ -64,7 +64,7 @@ HEALTH_CHECK_PASSWORD=
 ELASTIC_APM_SERVER_URL=
 ```
 
-**Note**: If running in Docker, use `host.docker.internal` or the Docker network IP instead of `localhost` for database connections.
+**Note**: If running in Docker, use `uat-portal-db-fra02-01.straker.io` or the Docker network IP instead of `localhost` for database connections.
 
 ### 3. Run the Service
 
