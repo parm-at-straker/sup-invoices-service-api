@@ -1,9 +1,18 @@
 # Changelog
 
+## 2026-01-20
+
+- Fixed: Invoice API now returns job_uuid field by joining with obj_tp_job table, enabling proper navigation from invoices to job details (Parmpreet Singh, 2026-01-20)
+- Changed: InvoiceResponse schema includes enriched job_uuid field from joined job table (Parmpreet Singh, 2026-01-20)
+- Changed: list_invoices and get_invoice methods now perform LEFT JOIN with obj_tp_job to populate job_uuid (Parmpreet Singh, 2026-01-20)
+- Fixed: PO-job relationship issue where jobid was numeric but job routes expect UUIDs (Parmpreet Singh, 2026-01-20)
+
 All notable changes to the Invoice/Purchase Order Service API will be documented in this file.
 
 ## [Unreleased]
 
+- Fixed: Added LEFT JOIN with obj_tp_job table in PurchaseOrderService list and get methods to enrich purchase order responses with job_id field, resolving issue where job IDs were not displayed in purchase orders list on frontend (Parmpreet Singh, 2026-01-20)
+- Fixed: Updated PurchaseOrderResponse schema to include job_id as enriched field from joined obj_tp_job table (Parmpreet Singh, 2026-01-20)
 - Fixed: Corrected database URL construction in database.py to properly extract password from SQLAlchemy URL object instead of string conversion which masked the password, resolving MySQL authentication failures (Parmpreet Singh, 2026-01-20)
 - Fixed: Added field validator to convert MySQL bytes to int for is_internal field in PurchaseOrderBase schema, resolving Pydantic validation errors when reading purchase orders from database (Parmpreet Singh, 2026-01-20)
 - Added: cryptography package to Pipfile for MySQL caching_sha2_password authentication method support (Parmpreet Singh, 2026-01-20)

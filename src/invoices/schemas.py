@@ -106,6 +106,9 @@ class InvoiceResponse(InvoiceBase):
     created: Optional[datetime] = None
     modified: Optional[datetime] = None
 
+    # Enriched fields (from joins)
+    job_uuid: Optional[str] = Field(None, description="Job UUID from joined obj_tp_job table")
+
 
 class InvoiceListResponse(BaseModel):
     """Schema for invoice list response."""
@@ -230,6 +233,9 @@ class PurchaseOrderResponse(PurchaseOrderBase):
     created: Optional[datetime] = None
     modified: Optional[datetime] = None
 
+    # Enriched fields (from joins)
+    job_id: Optional[int] = Field(None, description="Job ID from joined obj_tp_job table")
+
 
 class PurchaseOrderListResponse(BaseModel):
     """Schema for purchase order list response."""
@@ -293,4 +299,3 @@ class POMilestoneResponse(POMilestoneBase):
     obj_uuid: str
     created: Optional[datetime] = None
     modified: Optional[datetime] = None
-

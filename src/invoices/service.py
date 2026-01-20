@@ -59,21 +59,50 @@ class InvoiceService:
         await self.db.refresh(invoice)
         return invoice
 
-    async def get_invoice(self, invoice_uuid: str) -> Optional[Invoice]:
-        """Get an invoice by UUID.
+    async def get_invoice(self, invoice_uuid: str) -> Optional[dict]:
+        """Get an invoice by UUID with enriched job data.
 
         Args:
             invoice_uuid: Invoice UUID
 
         Returns:
-            Invoice if found, None otherwise
+            Invoice dict with job_uuid if found, None otherwise
         """
-        stmt = select(Invoice).where(
-            Invoice.obj_uuid == invoice_uuid,
-            Invoice.deleted != True
+        from sqlalchemy import Table, MetaData, Column, Integer, String
+
+        # Define Job table for joining
+        metadata = MetaData()
+        job_table = Table(
+            "obj_tp_job",
+            metadata,
+            Column("obj_uuid", String(36), primary_key=True),
+            Column("id", Integer),
+            schema="franchise"
+        )
+
+        stmt = (
+            select(
+                Invoice,
+                job_table.c.obj_uuid.label("job_uuid"),
+            )
+            .outerjoin(job_table, Invoice.jobid == job_table.c.id)
+            .where(
+                Invoice.obj_uuid == invoice_uuid,
+                Invoice.deleted != True
+            )
         )
         result = await self.db.execute(stmt)
-        return result.scalar_one_or_none()
+        row = result.first()
+
+        if not row:
+            return None
+
+        # Convert to dict and add job_uuid
+        invoice = row[0]
+        invoice_dict = {c.name: getattr(invoice, c.name) for c in invoice.__table__.columns}
+        invoice_dict["job_uuid"] = row[1]
+
+        return invoice_dict
 
     async def get_invoice_or_404(self, invoice_uuid: str) -> Invoice:
         """Get an invoice by UUID or raise 404.
@@ -161,16 +190,35 @@ class InvoiceService:
     async def list_invoices(
         self,
         filters: InvoiceFilterParams,
-    ) -> tuple[List[Invoice], int]:
+    ) -> tuple[List[dict], int]:
         """List invoices with filtering and pagination.
 
         Args:
             filters: Filter parameters
 
         Returns:
-            Tuple of (invoices list, total count)
+            Tuple of (invoices list with job_uuid, total count)
         """
-        stmt = select(Invoice).where(Invoice.deleted != True)
+        from sqlalchemy import Table, MetaData, Column, Integer, String
+
+        # Define Job table for joining
+        metadata = MetaData()
+        job_table = Table(
+            "obj_tp_job",
+            metadata,
+            Column("obj_uuid", String(36), primary_key=True),
+            Column("id", Integer),
+            schema="franchise"
+        )
+
+        stmt = (
+            select(
+                Invoice,
+                job_table.c.obj_uuid.label("job_uuid"),
+            )
+            .outerjoin(job_table, Invoice.jobid == job_table.c.id)
+            .where(Invoice.deleted != True)
+        )
         conditions = []
 
         # Apply filters
@@ -205,7 +253,12 @@ class InvoiceService:
             stmt = stmt.where(and_(*conditions))
 
         # Get total count before pagination
-        count_stmt = select(func.count()).select_from(stmt.subquery())
+        count_stmt = select(func.count()).select_from(
+            select(Invoice)
+            .where(Invoice.deleted != True)
+            .where(and_(*conditions) if conditions else True)
+            .subquery()
+        )
         total_result = await self.db.execute(count_stmt)
         total = total_result.scalar() or 0
 
@@ -221,8 +274,17 @@ class InvoiceService:
         stmt = stmt.offset(offset).limit(filters.page_size)
 
         result = await self.db.execute(stmt)
-        invoices = result.scalars().all()
-        return list(invoices), total
+        rows = result.all()
+
+        # Convert to dicts with job_uuid
+        invoices = []
+        for row in rows:
+            invoice = row[0]
+            invoice_dict = {c.name: getattr(invoice, c.name) for c in invoice.__table__.columns}
+            invoice_dict["job_uuid"] = row[1]
+            invoices.append(invoice_dict)
+
+        return invoices, total
 
 
 class PurchaseOrderService:
@@ -238,7 +300,7 @@ class PurchaseOrderService:
 
     async def create_purchase_order(
         self, po_data: PurchaseOrderCreate, user_id: str
-    ) -> PurchaseOrder:
+    ) -> dict:
         """Create a new purchase order.
 
         Args:
@@ -246,7 +308,7 @@ class PurchaseOrderService:
             user_id: ID of user creating the PO
 
         Returns:
-            Created purchase order
+            Created purchase order dict with job_id
         """
         po_dict = po_data.model_dump(exclude_unset=True)
         po_dict["created"] = datetime.now(timezone.utc)
@@ -256,32 +318,68 @@ class PurchaseOrderService:
         self.db.add(po)
         await self.db.commit()
         await self.db.refresh(po)
-        return po
 
-    async def get_purchase_order(self, po_uuid: str) -> Optional[PurchaseOrder]:
-        """Get a purchase order by UUID.
+        # Return enriched dict with job_id
+        return await self.get_purchase_order(po.obj_uuid)
+
+    async def get_purchase_order(self, po_uuid: str) -> Optional[dict]:
+        """Get a purchase order by UUID with enriched job_id.
 
         Args:
             po_uuid: Purchase order UUID
 
         Returns:
-            Purchase order if found, None otherwise
+            Purchase order dict with job_id if found, None otherwise
         """
-        stmt = select(PurchaseOrder).where(
-            PurchaseOrder.obj_uuid == po_uuid,
-            PurchaseOrder.is_deleted != True
+        from sqlalchemy import Table, MetaData, Column, Integer, String, text
+
+        # Define Job table for joining (manually, not autoload)
+        metadata = MetaData()
+        job_table = Table(
+            "obj_tp_job",
+            metadata,
+            Column("obj_uuid", String(36), primary_key=True),
+            Column("id", Integer),
+            schema="franchise"
+        )
+
+        stmt = (
+            select(
+                PurchaseOrder,
+                job_table.c.id.label("job_id"),
+            )
+            .outerjoin(job_table, PurchaseOrder.tp_job == job_table.c.obj_uuid)
+            .where(
+                PurchaseOrder.obj_uuid == po_uuid,
+                PurchaseOrder.is_deleted != True
+            )
         )
         result = await self.db.execute(stmt)
-        return result.scalar_one_or_none()
+        row = result.first()
 
-    async def get_purchase_order_or_404(self, po_uuid: str) -> PurchaseOrder:
+        if not row:
+            return None
+
+        po = row[0]
+        job_id = row[1]
+
+        # Convert PO model to dict and add job_id
+        po_dict = {
+            column.name: getattr(po, column.name)
+            for column in PurchaseOrder.__table__.columns
+        }
+        po_dict["job_id"] = job_id
+
+        return po_dict
+
+    async def get_purchase_order_or_404(self, po_uuid: str) -> dict:
         """Get a purchase order by UUID or raise 404.
 
         Args:
             po_uuid: Purchase order UUID
 
         Returns:
-            Purchase order
+            Purchase order dict with job_id
 
         Raises:
             PurchaseOrderNotFoundError: If PO not found
@@ -295,7 +393,7 @@ class PurchaseOrderService:
 
     async def update_purchase_order(
         self, po_uuid: str, po_data: PurchaseOrderUpdate, user_id: str
-    ) -> PurchaseOrder:
+    ) -> dict:
         """Update a purchase order.
 
         Args:
@@ -304,12 +402,23 @@ class PurchaseOrderService:
             user_id: ID of user updating the PO
 
         Returns:
-            Updated purchase order
+            Updated purchase order dict with job_id
 
         Raises:
             PurchaseOrderNotFoundError: If PO not found
         """
-        po = await self.get_purchase_order_or_404(po_uuid)
+        # Get the actual PO model for updating (not enriched dict)
+        stmt = select(PurchaseOrder).where(
+            PurchaseOrder.obj_uuid == po_uuid,
+            PurchaseOrder.is_deleted != True
+        )
+        result = await self.db.execute(stmt)
+        po = result.scalar_one_or_none()
+
+        if not po:
+            raise PurchaseOrderNotFoundError(
+                f"Purchase order with UUID {po_uuid} not found"
+            )
 
         update_data = po_data.model_dump(exclude_unset=True)
         update_data["modified"] = datetime.now(timezone.utc)
@@ -319,7 +428,9 @@ class PurchaseOrderService:
 
         await self.db.commit()
         await self.db.refresh(po)
-        return po
+
+        # Return enriched dict with job_id
+        return await self.get_purchase_order(po_uuid)
 
     async def delete_purchase_order(self, po_uuid: str, user_id: str) -> None:
         """Delete a purchase order (soft delete).
@@ -331,12 +442,24 @@ class PurchaseOrderService:
         Raises:
             PurchaseOrderNotFoundError: If PO not found
         """
-        po = await self.get_purchase_order_or_404(po_uuid)
+        # Get the actual PO model for updating (not enriched dict)
+        stmt = select(PurchaseOrder).where(
+            PurchaseOrder.obj_uuid == po_uuid,
+            PurchaseOrder.is_deleted != True
+        )
+        result = await self.db.execute(stmt)
+        po = result.scalar_one_or_none()
+
+        if not po:
+            raise PurchaseOrderNotFoundError(
+                f"Purchase order with UUID {po_uuid} not found"
+            )
+
         po.is_deleted = True
         po.modified = datetime.now(timezone.utc)
         await self.db.commit()
 
-    async def approve_purchase_order(self, po_uuid: str, user_id: str) -> PurchaseOrder:
+    async def approve_purchase_order(self, po_uuid: str, user_id: str) -> dict:
         """Approve a purchase order for payment.
 
         Args:
@@ -344,33 +467,67 @@ class PurchaseOrderService:
             user_id: ID of user approving the PO
 
         Returns:
-            Approved purchase order
+            Approved purchase order dict with job_id
 
         Raises:
             PurchaseOrderNotFoundError: If PO not found
         """
-        po = await self.get_purchase_order_or_404(po_uuid)
+        # Get the actual PO model for updating (not enriched dict)
+        stmt = select(PurchaseOrder).where(
+            PurchaseOrder.obj_uuid == po_uuid,
+            PurchaseOrder.is_deleted != True
+        )
+        result = await self.db.execute(stmt)
+        po = result.scalar_one_or_none()
+
+        if not po:
+            raise PurchaseOrderNotFoundError(
+                f"Purchase order with UUID {po_uuid} not found"
+            )
+
         po.approvedforpayment = 1
         po.approveddate = datetime.now(timezone.utc)
         po.status = "Approved"
         po.modified = datetime.now(timezone.utc)
         await self.db.commit()
         await self.db.refresh(po)
-        return po
+
+        # Return enriched dict with job_id
+        return await self.get_purchase_order(po_uuid)
 
     async def list_purchase_orders(
         self,
         filters: PurchaseOrderFilterParams,
-    ) -> tuple[List[PurchaseOrder], int]:
+    ) -> tuple[List[dict], int]:
         """List purchase orders with filtering and pagination.
 
         Args:
             filters: Filter parameters
 
         Returns:
-            Tuple of (POs list, total count)
+            Tuple of (POs list with enriched data, total count)
         """
-        stmt = select(PurchaseOrder).where(PurchaseOrder.is_deleted != True)
+        from sqlalchemy import Table, MetaData, Column, Integer, String
+
+        # Define Job table for joining (manually, not autoload)
+        metadata = MetaData()
+        job_table = Table(
+            "obj_tp_job",
+            metadata,
+            Column("obj_uuid", String(36), primary_key=True),
+            Column("id", Integer),
+            schema="franchise"
+        )
+
+        # Create query with LEFT JOIN to get job_id
+        stmt = (
+            select(
+                PurchaseOrder,
+                job_table.c.id.label("job_id"),
+            )
+            .outerjoin(job_table, PurchaseOrder.tp_job == job_table.c.obj_uuid)
+            .where(PurchaseOrder.is_deleted != True)
+        )
         conditions = []
 
         # Apply filters
@@ -419,7 +576,15 @@ class PurchaseOrderService:
             stmt = stmt.where(and_(*conditions))
 
         # Get total count before pagination
-        count_stmt = select(func.count()).select_from(stmt.subquery())
+        count_stmt = (
+            select(func.count())
+            .select_from(PurchaseOrder)
+            .outerjoin(job_table, PurchaseOrder.tp_job == job_table.c.obj_uuid)
+            .where(PurchaseOrder.is_deleted != True)
+        )
+        if conditions:
+            count_stmt = count_stmt.where(and_(*conditions))
+
         total_result = await self.db.execute(count_stmt)
         total = total_result.scalar() or 0
 
@@ -435,5 +600,20 @@ class PurchaseOrderService:
         stmt = stmt.offset(offset).limit(filters.page_size)
 
         result = await self.db.execute(stmt)
-        pos = result.scalars().all()
-        return list(pos), total
+        rows = result.all()
+
+        # Convert rows to dictionaries with enriched data
+        pos_with_job_id = []
+        for row in rows:
+            po = row[0]
+            job_id = row[1]
+
+            # Convert PO model to dict and add job_id
+            po_dict = {
+                column.name: getattr(po, column.name)
+                for column in PurchaseOrder.__table__.columns
+            }
+            po_dict["job_id"] = job_id
+            pos_with_job_id.append(po_dict)
+
+        return pos_with_job_id, total

@@ -119,9 +119,13 @@ async def list_invoices(
 
     # Get invoices
     invoices, total = await invoice_service.list_invoices(filters)
+    
+    # Convert dicts to InvoiceResponse objects
+    from .schemas import InvoiceResponse
+    invoice_objects = [InvoiceResponse.model_validate(inv) for inv in invoices]
 
     return InvoiceListResponse(
-        data=invoices,
+        data=invoice_objects,
         pagination=paginate(pagination, total),
     )
 
@@ -149,7 +153,13 @@ async def get_invoice(
     require_invoice_permission(user["role"], InvoicePermission.READ)
 
     try:
-        invoice = await invoice_service.get_invoice_or_404(invoice_uuid)
+        invoice_dict = await invoice_service.get_invoice(invoice_uuid)
+        if not invoice_dict:
+            raise InvoiceNotFoundError(f"Invoice with UUID {invoice_uuid} not found")
+        
+        # Convert dict to InvoiceResponse object
+        from .schemas import InvoiceResponse
+        invoice = InvoiceResponse.model_validate(invoice_dict)
         return InvoiceDetailResponse(data=invoice)
     except InvoiceNotFoundError as e:
         raise HTTPException(
