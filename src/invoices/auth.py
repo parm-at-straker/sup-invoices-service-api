@@ -1,5 +1,6 @@
 """Authentication and authorization dependencies."""
 
+import os
 from typing import Optional
 
 from fastapi import Depends, Header, HTTPException, status
@@ -23,6 +24,17 @@ async def get_current_user_role(
     Raises:
         HTTPException: If authentication fails
     """
+    # DEVELOPMENT MODE: Allow unauthenticated access in local environment
+    environment = os.getenv("ENVIRONMENT", "local")
+    if environment == "local":
+        # Return a mock admin user for local development
+        return {
+            "user_id": "dev-user",
+            "role": UserRole.ADMIN,
+            "authenticated": True,
+            "dev_mode": True,
+        }
+
     # For now, we'll use a simple approach
     # In production, this should validate JWT tokens or API keys
     # and extract user information from the API Gateway

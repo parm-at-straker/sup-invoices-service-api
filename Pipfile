@@ -22,6 +22,8 @@ buglog = {version = "==0.1.4", index = "straker"}
 aiomysql = "*"
 sniffio = "*"
 anyio = "*"
+greenlet = "*"
+cryptography = "*"
 
 [dev-packages]
 pytest = "*"

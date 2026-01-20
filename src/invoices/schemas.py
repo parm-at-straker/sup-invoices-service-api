@@ -3,7 +3,7 @@
 from datetime import datetime
 from typing import Optional
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from ..pagination import Pagination
 from .enums import InvoiceStatus, POStatus
@@ -195,6 +195,14 @@ class PurchaseOrderBase(BaseModel):
     is_prebooked: Optional[bool] = None
     is_internal: Optional[int] = None
     qa_checked_date: Optional[datetime] = None
+
+    @field_validator("is_internal", mode="before")
+    @classmethod
+    def convert_bytes_to_int(cls, v):
+        """Convert bytes from MySQL boolean to int."""
+        if isinstance(v, bytes):
+            return int.from_bytes(v, byteorder="big")
+        return v
 
 
 class PurchaseOrderCreate(PurchaseOrderBase):

@@ -4,6 +4,9 @@ All notable changes to the Invoice/Purchase Order Service API will be documented
 
 ## [Unreleased]
 
+- Fixed: Corrected database URL construction in database.py to properly extract password from SQLAlchemy URL object instead of string conversion which masked the password, resolving MySQL authentication failures (Parmpreet Singh, 2026-01-20)
+- Fixed: Added field validator to convert MySQL bytes to int for is_internal field in PurchaseOrderBase schema, resolving Pydantic validation errors when reading purchase orders from database (Parmpreet Singh, 2026-01-20)
+- Added: cryptography package to Pipfile for MySQL caching_sha2_password authentication method support (Parmpreet Singh, 2026-01-20)
 - Added: ENVIRONMENT.md documentation with database and Redis configuration for Docker development (Parmpreet Singh, 2026-01-09)
 - Added: Invoice/Purchase Order Service implementation with full CRUD operations (Parmpreet Singh, 2026-01-07)
 - Added: Invoice models (Invoice, InvoiceGroup, InvoiceItem) with all database fields mapped (Parmpreet Singh, 2026-01-07)

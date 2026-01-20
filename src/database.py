@@ -17,11 +17,10 @@ engines = DBEnginePool(
 def get_async_engine(db_name: str):
     """Create an async engine from the sync engine URL."""
     sync_engine = engines[db_name]
-    # Replace the driver with the async one
-    url = str(sync_engine.url).replace("mysqlconnector", "aiomysql")
-    # Ensure it starts with mysql+aiomysql://
-    if "mysql://" in url and "aiomysql" not in url:
-         url = url.replace("mysql://", "mysql+aiomysql://")
+    # Get the URL object to access the real password (not masked)
+    url_obj = sync_engine.url
+    # Build the async URL with the actual password
+    url = f"mysql+aiomysql://{url_obj.username}:{url_obj.password}@{url_obj.host}:{url_obj.port}/{url_obj.database}"
 
     return create_async_engine(url, echo=False)
 
