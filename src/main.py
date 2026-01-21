@@ -31,9 +31,18 @@ app = FastAPI(
     docs_url="/docs" if config.environment != Environment.production else None,
     redoc_url="/redoc" if config.environment != Environment.production else None,
 )
+
+# Define allowed origins for CORS (includes local dev and production)
+ALLOWED_ORIGINS = [
+    "http://localhost:3001",  # Verify Hub UI dev
+    "http://localhost:3000",  # Alternate dev port
+    "https://franchise.strakergroup.com",  # Production
+    "https://franchise-staging.strakergroup.com",  # Staging
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

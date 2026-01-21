@@ -6,7 +6,7 @@ services:
     env_file:
       - .env
     ports:
-      - "12345:80"
+      - "13008:80"
     networks:
       - local-straker
     restart: unless-stopped
@@ -14,4 +14,4 @@ services:
 networks:
   local-straker:
     name: development_local-straker
-    driver: bridge
+    external: true
