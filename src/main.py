@@ -37,6 +37,7 @@ ALLOWED_ORIGINS = [
     "http://localhost:13001",  # Verify Hub UI dev
     "http://localhost:3000",  # Alternate dev port
     "http://10.135.60.85:13001",  # Verify Hub UI production (server IP)
+    "https://poc-verify-hub.straker.ai",  # POC environment
     "https://franchise.strakergroup.com",  # Production
     "https://franchise-staging.strakergroup.com",  # Staging
 ]
