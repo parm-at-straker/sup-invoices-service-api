@@ -34,7 +34,7 @@ app = FastAPI(
 
 # Define allowed origins for CORS (includes local dev and production)
 ALLOWED_ORIGINS = [
-    "http://localhost:3001",  # Verify Hub UI dev
+    "http://localhost:13001",  # Verify Hub UI dev
     "http://localhost:3000",  # Alternate dev port
     "https://franchise.strakergroup.com",  # Production
     "https://franchise-staging.strakergroup.com",  # Staging
