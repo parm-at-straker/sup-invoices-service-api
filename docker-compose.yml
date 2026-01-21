@@ -8,12 +8,10 @@ services:
     ports:
       - "12345:80"
     networks:
-      local-straker:
-        ipv4_address: 172.20.0.47
-    extra_hosts:
-      local-buglog.strakergroup.com: 172.17.0.1
+      - local-straker
+    restart: unless-stopped
 
 networks:
   local-straker:
     name: development_local-straker
-    external: true
+    driver: bridge

@@ -2,7 +2,7 @@
 # https://pipenv.pypa.io/en/latest/docker.html
 
 # First build stage - Build venv with pipenv
-FROM docker.io/python:3.12-slim-bullseye as builder
+FROM docker.io/python:3.12-slim-bullseye AS builder
 
 RUN pip install --user pipenv
 
