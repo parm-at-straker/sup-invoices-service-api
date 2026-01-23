@@ -1,0 +1,45 @@
+---
+description: Invoice Service database schema and tables
+alwaysApply: false
+---
+
+# Invoice Service Database Schema
+
+**Primary Databases**: `franchise` (primary), `sitemanager` (if needed)
+
+## Franchise Database Tables
+
+### Invoices
+- Invoice tables for invoice management
+- Invoice line items
+- Invoice groups
+- Invoice status and workflow
+
+### Purchase Orders
+- Purchase order tables
+- PO milestones
+- PO disbursements
+- PO approval workflow
+
+### Sales Orders
+- Sales order tables
+- Sales order to invoice transformation
+- Sales order status
+
+## Database Configuration
+
+The service uses both `franchise` and `sitemanager` databases:
+- **Primary operations**: `franchise` database
+- **Read-only queries**: `franchise_readonly` database
+- **Sitemanager access**: If needed for group/client data
+
+## Environment Variables
+
+Database connections use the standard pattern:
+- `DB_HOST_franchise` / `DB_HOST_franchise_readonly`
+- `DB_PORT_franchise` / `DB_PORT_franchise_readonly`
+- `DB_USER_franchise` / `DB_USER_franchise_readonly`
+- `DB_PASSWORD_franchise` / `DB_PASSWORD_franchise_readonly`
+- `DB_NAME_franchise` / `DB_NAME_franchise_readonly`
+
+Same pattern for `sitemanager` if needed.

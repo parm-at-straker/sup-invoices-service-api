@@ -1,5 +1,27 @@
 # Changelog
 
+## 2026-01-23
+
+- Added: Sales Order management module with full CRUD operations, transform-to-invoice, and cancel functionality (Parmpreet Singh, 2026-01-23)
+- Added: Sales Order models, schemas, enums, service layer, router, and permissions module (Parmpreet Singh, 2026-01-23)
+- Added: Sales Order API endpoints: GET /v1/sales-orders, GET /v1/sales-orders/{uuid}, POST /v1/sales-orders, PUT /v1/sales-orders/{uuid}, DELETE /v1/sales-orders/{uuid}, POST /v1/sales-orders/{uuid}/transform-to-invoice, POST /v1/sales-orders/{uuid}/cancel (Parmpreet Singh, 2026-01-23)
+- Added: Invoice Line Items API endpoints: GET /v1/invoices/{uuid}/items, POST /v1/invoices/{uuid}/items, GET /v1/invoices/{uuid}/items/{item_uuid}, PUT /v1/invoices/{uuid}/items/{item_uuid}, DELETE /v1/invoices/{uuid}/items/{item_uuid} (Parmpreet Singh, 2026-01-23)
+- Added: Invoice Groups API endpoints: GET /v1/invoice-groups, GET /v1/invoice-groups/{uuid}, POST /v1/invoice-groups, PUT /v1/invoice-groups/{uuid}, DELETE /v1/invoice-groups/{uuid}, POST /v1/invoice-groups/{uuid}/add-invoice, POST /v1/invoice-groups/{uuid}/remove-invoice (Parmpreet Singh, 2026-01-23)
+- Added: PO Milestones API endpoints: GET /v1/purchase-orders/{uuid}/milestones, POST /v1/purchase-orders/{uuid}/milestones, PUT /v1/purchase-orders/{uuid}/milestones/{milestone_uuid} (Parmpreet Singh, 2026-01-23)
+- Added: PO Disbursement Items model (PODisbursementItem) and API endpoints: GET /v1/purchase-orders/{uuid}/disbursements, POST /v1/purchase-orders/{uuid}/disbursements, PUT /v1/purchase-orders/{uuid}/disbursements/{item_uuid}, DELETE /v1/purchase-orders/{uuid}/disbursements/{item_uuid} (Parmpreet Singh, 2026-01-23)
+- Added: Batch operations for purchase orders: POST /v1/purchase-orders/batch-approve, POST /v1/purchase-orders/batch-delete (Parmpreet Singh, 2026-01-23)
+- Added: Archive and restore functionality for invoices and purchase orders: POST /v1/invoices/{uuid}/archive, POST /v1/invoices/{uuid}/restore, POST /v1/purchase-orders/{uuid}/archive, POST /v1/purchase-orders/{uuid}/restore (Parmpreet Singh, 2026-01-23)
+- Added: Status workflow validation module with valid transition rules for invoices and purchase orders (Parmpreet Singh, 2026-01-23)
+- Added: Invoice status workflow validation with transitions: Draft→Pending→Sent→Paid, with terminal states Cancelled and Refunded (Parmpreet Singh, 2026-01-23)
+- Added: Purchase Order status workflow validation with transitions: Pending→Accepted→In Progress→Completed→Approved→Paid, with terminal states Declined, Cancelled, Expired (Parmpreet Singh, 2026-01-23)
+- Added: Comprehensive unit tests for InvoiceService, PurchaseOrderService, and SalesOrderService with mock database sessions (Parmpreet Singh, 2026-01-23)
+- Added: Unit tests for status workflow validation covering valid and invalid transitions (Parmpreet Singh, 2026-01-23)
+- Added: Integration tests for all API endpoints covering CRUD flows, batch operations, and error handling (Parmpreet Singh, 2026-01-23)
+- Changed: InvoiceService methods now return dict objects with enriched job_uuid field instead of model objects for consistency (Parmpreet Singh, 2026-01-23)
+- Changed: Updated invoice router to properly convert service dict responses to Pydantic response models (Parmpreet Singh, 2026-01-23)
+- Changed: Added status transition validation to invoice and purchase order update and approve methods (Parmpreet Singh, 2026-01-23)
+- Changed: Archive functionality uses deleted flag with status set to "Archived" for invoices and purchase orders (Parmpreet Singh, 2026-01-23)
+
 ## 2026-01-20
 
 - Fixed: Invoice API now returns job_uuid field by joining with obj_tp_job table, enabling proper navigation from invoices to job details (Parmpreet Singh, 2026-01-20)

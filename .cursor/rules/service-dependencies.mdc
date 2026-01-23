@@ -1,0 +1,43 @@
+---
+description: Invoice Service dependencies and integration points
+alwaysApply: false
+---
+
+# Invoice Service Dependencies
+
+## Service Dependencies
+
+- **sup-auth-service-api**: Authentication and token validation
+
+## External Dependencies
+
+- **MySQL/Percona**:
+  - `franchise` database (primary)
+  - `franchise_readonly` database (read queries)
+  - `sitemanager` database (if needed for group/client data)
+  - `sitemanager_readonly` database (if needed)
+
+## Environment Variables
+
+- `ENVIRONMENT` - Environment (local, dev, uat, production)
+- `DB_HOST_franchise` - Franchise DB host
+- `DB_PORT_franchise` - Franchise DB port (default: 3306)
+- `DB_USER_franchise` - Franchise DB user
+- `DB_PASSWORD_franchise` - Franchise DB password
+- `DB_NAME_franchise` - Franchise DB name
+- `DB_HOST_franchise_readonly` - Franchise read-only DB host
+- `DB_PORT_franchise_readonly` - Franchise read-only DB port
+- `DB_USER_franchise_readonly` - Franchise read-only DB user
+- `DB_PASSWORD_franchise_readonly` - Franchise read-only DB password
+- `DB_HOST_sitemanager` - Sitemanager DB host (if needed)
+- `DB_PORT_sitemanager` - Sitemanager DB port (if needed)
+- `DB_USER_sitemanager` - Sitemanager DB user (if needed)
+- `DB_PASSWORD_sitemanager` - Sitemanager DB password (if needed)
+- `HEALTH_CHECK_PASSWORD` - Health check password (required in production)
+- `ELASTIC_APM_SERVER_URL` - Elastic APM server URL (optional)
+
+## Related Services
+
+- **Job Service**: Jobs may be linked to invoices
+- **Project Service**: Projects may have associated invoices
+- **Quoting Service**: Quotes may be converted to invoices

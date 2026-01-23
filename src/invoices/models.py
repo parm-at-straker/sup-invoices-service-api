@@ -570,3 +570,43 @@ class POMilestone(Base):
         DateTime, name="modified"
     )
 
+
+class PODisbursementItem(Base):
+    """Purchase Order Disbursement Item Model.
+
+    Table: franchise.obj_tp_po_disbursements_item
+    Key: obj_uuid
+    """
+
+    __tablename__ = "obj_tp_po_disbursements_item"
+    __table_args__ = {"schema": "franchise"}
+
+    # Primary Key
+    obj_uuid: Mapped[str] = mapped_column(
+        String(36),
+        primary_key=True,
+        default=lambda: str(uuid.uuid4()),
+    )
+
+    # Relationships
+    po_uuid: Mapped[Optional[str]] = mapped_column(String(36), name="po_uuid")
+
+    # Item Details
+    item_type: Mapped[Optional[str]] = mapped_column(String, name="item_type")
+    item_type_info: Mapped[Optional[str]] = mapped_column(Text, name="item_type_info")
+    no_of_units: Mapped[Optional[int]] = mapped_column(Integer, name="no_of_units")
+    rate_per_unit: Mapped[Optional[float]] = mapped_column(
+        Numeric(10, 2), name="rate_per_unit"
+    )
+    total_cost: Mapped[Optional[float]] = mapped_column(
+        Numeric(10, 2), name="total_cost"
+    )
+
+    # Timestamps
+    created: Mapped[Optional[datetime.datetime]] = mapped_column(
+        DateTime, name="created"
+    )
+    modified: Mapped[Optional[datetime.datetime]] = mapped_column(
+        DateTime, name="modified"
+    )
+

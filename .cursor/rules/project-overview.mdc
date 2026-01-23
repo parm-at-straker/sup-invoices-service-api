@@ -1,0 +1,76 @@
+---
+description: Invoice Service project overview and API endpoints
+alwaysApply: false
+---
+
+# Invoice/Purchase Order Service API
+
+**Port**: 12345
+**Purpose**: Managing invoices and purchase orders in the Straker translation platform
+
+## Features
+
+- Invoice management (CRUD operations, approval, archive/restore, line items, groups)
+- Purchase Order management (CRUD operations, approval workflow, milestones, disbursements, batch operations)
+- Sales Order management (CRUD operations, transform-to-invoice, cancel)
+- Financial reporting and operations
+
+## API Endpoints
+
+### Invoices
+- `GET /v1/invoices` - List invoices with filtering and pagination
+- `GET /v1/invoices/{uuid}` - Get invoice by UUID
+- `POST /v1/invoices` - Create new invoice
+- `PUT /v1/invoices/{uuid}` - Update invoice
+- `DELETE /v1/invoices/{uuid}` - Delete invoice (soft delete)
+- `POST /v1/invoices/{uuid}/approve` - Approve invoice
+- `POST /v1/invoices/{uuid}/archive` - Archive invoice
+- `POST /v1/invoices/{uuid}/restore` - Restore archived invoice
+
+### Invoice Line Items
+- `GET /v1/invoices/{uuid}/items` - List invoice line items
+- `POST /v1/invoices/{uuid}/items` - Add line item to invoice
+- `GET /v1/invoices/{uuid}/items/{item_uuid}` - Get invoice line item
+- `PUT /v1/invoices/{uuid}/items/{item_uuid}` - Update invoice line item
+- `DELETE /v1/invoices/{uuid}/items/{item_uuid}` - Remove line item from invoice
+
+### Invoice Groups
+- `GET /v1/invoice-groups` - List invoice groups with filtering and pagination
+- `GET /v1/invoice-groups/{uuid}` - Get invoice group with invoices
+- `POST /v1/invoice-groups` - Create new invoice group
+- `PUT /v1/invoice-groups/{uuid}` - Update invoice group
+- `DELETE /v1/invoice-groups/{uuid}` - Delete invoice group (soft delete)
+- `POST /v1/invoice-groups/{uuid}/add-invoice` - Add invoice to group
+- `POST /v1/invoice-groups/{uuid}/remove-invoice` - Remove invoice from group
+
+### Purchase Orders
+- `GET /v1/purchase-orders` - List purchase orders with filtering and pagination
+- `GET /v1/purchase-orders/{uuid}` - Get purchase order by UUID
+- `POST /v1/purchase-orders` - Create new purchase order
+- `PUT /v1/purchase-orders/{uuid}` - Update purchase order
+- `DELETE /v1/purchase-orders/{uuid}` - Delete purchase order (soft delete)
+- `POST /v1/purchase-orders/{uuid}/approve` - Approve purchase order for payment
+- `POST /v1/purchase-orders/{uuid}/archive` - Archive purchase order
+- `POST /v1/purchase-orders/{uuid}/restore` - Restore archived purchase order
+- `POST /v1/purchase-orders/batch-approve` - Approve multiple purchase orders
+- `POST /v1/purchase-orders/batch-delete` - Delete multiple purchase orders
+
+### Purchase Order Milestones
+- `GET /v1/purchase-orders/{uuid}/milestones` - List PO milestones
+- `POST /v1/purchase-orders/{uuid}/milestones` - Record PO milestone
+- `PUT /v1/purchase-orders/{uuid}/milestones/{milestone_uuid}` - Update PO milestone
+
+### Purchase Order Disbursements
+- `GET /v1/purchase-orders/{uuid}/disbursements` - List PO disbursement items
+- `POST /v1/purchase-orders/{uuid}/disbursements` - Add disbursement item
+- `PUT /v1/purchase-orders/{uuid}/disbursements/{item_uuid}` - Update disbursement item
+- `DELETE /v1/purchase-orders/{uuid}/disbursements/{item_uuid}` - Delete disbursement item
+
+### Sales Orders
+- `GET /v1/sales-orders` - List sales orders with filtering and pagination
+- `GET /v1/sales-orders/{uuid}` - Get sales order by UUID
+- `POST /v1/sales-orders` - Create new sales order
+- `PUT /v1/sales-orders/{uuid}` - Update sales order
+- `DELETE /v1/sales-orders/{uuid}` - Delete sales order (soft delete)
+- `POST /v1/sales-orders/{uuid}/transform-to-invoice` - Transform sales order to invoice
+- `POST /v1/sales-orders/{uuid}/cancel` - Cancel sales order

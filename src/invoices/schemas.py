@@ -291,6 +291,12 @@ class POMilestoneCreate(POMilestoneBase):
     milestone: int = Field(..., ge=1, le=100, description="Milestone percentage")
 
 
+class POMilestoneUpdate(POMilestoneBase):
+    """Schema for updating a PO milestone."""
+
+    pass
+
+
 class POMilestoneResponse(POMilestoneBase):
     """Schema for PO milestone response."""
 
@@ -299,3 +305,248 @@ class POMilestoneResponse(POMilestoneBase):
     obj_uuid: str
     created: Optional[datetime] = None
     modified: Optional[datetime] = None
+
+
+# Invoice Item Schemas
+class InvoiceItemBase(BaseModel):
+    """Base invoice item schema with common fields."""
+
+    invoice_uuid: Optional[str] = Field(None, max_length=36)
+    item_type: Optional[str] = None
+    source_lang: Optional[str] = None
+    target_lang: Optional[str] = None
+    currency: Optional[str] = None
+    unit_price: Optional[float] = None
+    amount_nett: Optional[float] = None
+
+
+class InvoiceItemCreate(InvoiceItemBase):
+    """Schema for creating a new invoice item."""
+
+    invoice_uuid: str = Field(..., max_length=36, description="Invoice UUID")
+    item_type: str = Field(..., description="Item type (language_pair, additional_item, etc.)")
+    amount_nett: float = Field(..., ge=0, description="Item net amount")
+    currency: str = Field(..., description="Currency code")
+
+
+class InvoiceItemUpdate(InvoiceItemBase):
+    """Schema for updating an invoice item."""
+
+    pass
+
+
+class InvoiceItemResponse(InvoiceItemBase):
+    """Schema for invoice item response."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    obj_uuid: str
+    id: Optional[int] = None
+    created: Optional[datetime] = None
+    modified: Optional[datetime] = None
+
+
+class InvoiceItemListResponse(BaseModel):
+    """Schema for invoice item list response."""
+
+    data: list[InvoiceItemResponse]
+
+
+class InvoiceItemDetailResponse(BaseModel):
+    """Schema for single invoice item detail response."""
+
+    data: InvoiceItemResponse
+
+
+# PO Disbursement Item Schemas
+class PODisbursementItemBase(BaseModel):
+    """Base PO disbursement item schema with common fields."""
+
+    po_uuid: Optional[str] = Field(None, max_length=36)
+    item_type: Optional[str] = None
+    item_type_info: Optional[str] = None
+    no_of_units: Optional[int] = None
+    rate_per_unit: Optional[float] = None
+    total_cost: Optional[float] = None
+
+
+class PODisbursementItemCreate(PODisbursementItemBase):
+    """Schema for creating a new PO disbursement item."""
+
+    po_uuid: str = Field(..., max_length=36, description="Purchase Order UUID")
+    item_type: str = Field(..., description="Item type")
+    item_type_info: str = Field(..., description="Item type information")
+    no_of_units: int = Field(..., ge=1, description="Number of units")
+    rate_per_unit: float = Field(..., ge=0, description="Rate per unit")
+    total_cost: float = Field(..., ge=0, description="Total cost")
+
+
+class PODisbursementItemUpdate(PODisbursementItemBase):
+    """Schema for updating a PO disbursement item."""
+
+    pass
+
+
+class PODisbursementItemResponse(PODisbursementItemBase):
+    """Schema for PO disbursement item response."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    obj_uuid: str
+    created: Optional[datetime] = None
+    modified: Optional[datetime] = None
+
+
+class PODisbursementItemListResponse(BaseModel):
+    """Schema for PO disbursement item list response."""
+
+    data: list[PODisbursementItemResponse]
+
+
+class PODisbursementItemDetailResponse(BaseModel):
+    """Schema for single PO disbursement item detail response."""
+
+    data: PODisbursementItemResponse
+
+
+# Batch Operation Schemas
+class BatchPOApproveRequest(BaseModel):
+    """Schema for batch PO approval."""
+
+    po_uuids: list[str] = Field(..., min_length=1, description="List of PO UUIDs to approve")
+
+
+class BatchPODeleteRequest(BaseModel):
+    """Schema for batch PO deletion."""
+
+    po_uuids: list[str] = Field(..., min_length=1, description="List of PO UUIDs to delete")
+
+
+class BatchOperationResponse(BaseModel):
+    """Schema for batch operation response."""
+
+    success_count: int
+    failure_count: int
+    results: list[dict] = Field(
+        default_factory=list, description="List of operation results"
+    )
+
+
+# Invoice Group Schemas
+class InvoiceGroupBase(BaseModel):
+    """Base invoice group schema with common fields."""
+
+    companyid: Optional[str] = Field(None, max_length=36)
+    entityid: Optional[str] = Field(None, max_length=36)
+    invoice_date: Optional[datetime] = None
+    due_date: Optional[datetime] = None
+    currency: Optional[str] = None
+    amount: Optional[float] = None
+    amount_nett: Optional[float] = None
+    tax: Optional[float] = None
+    tax_rate: Optional[float] = None
+    zerorated: Optional[bool] = None
+    tax_exempt: Optional[bool] = None
+    transaction_type: Optional[str] = None
+    invoice_type: Optional[str] = None
+    status: Optional[str] = None
+    client_name: Optional[str] = None
+    client_email: Optional[str] = None
+    client_address1: Optional[str] = None
+    client_address2: Optional[str] = None
+    client_city: Optional[str] = None
+    client_postcode: Optional[str] = None
+    client_country: Optional[str] = None
+    invoice_branding: Optional[str] = None
+    notes: Optional[str] = None
+    description: Optional[str] = None
+    incl_invoices: Optional[bool] = None
+    incl_job_title: Optional[bool] = None
+    incl_wordrate: Optional[bool] = None
+    incl_wordcount: Optional[bool] = None
+    incl_source_files: Optional[bool] = None
+    incl_po: Optional[bool] = None
+    incl_po_date: Optional[bool] = None
+    incl_ref: Optional[bool] = None
+    incl_leadtime: Optional[bool] = None
+    inv_orderby_lang: Optional[bool] = None
+    is_summary: Optional[bool] = None
+
+
+class InvoiceGroupCreate(InvoiceGroupBase):
+    """Schema for creating a new invoice group."""
+
+    companyid: str = Field(..., max_length=36, description="Company/Group UUID")
+    currency: str = Field(..., description="Currency code")
+    invoice_date: datetime = Field(..., description="Invoice date")
+    status: Optional[str] = Field(default="Draft", description="Invoice group status")
+
+
+class InvoiceGroupUpdate(InvoiceGroupBase):
+    """Schema for updating an invoice group."""
+
+    pass
+
+
+class InvoiceGroupResponse(InvoiceGroupBase):
+    """Schema for invoice group response."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    obj_uuid: str
+    id: Optional[int] = None
+    xero_inv_number: Optional[str] = None
+    ns_inv_number: Optional[str] = None
+    created_by: Optional[str] = None
+    modified_by: Optional[str] = None
+    created: Optional[datetime] = None
+    modified: Optional[datetime] = None
+    sent: Optional[datetime] = None
+    paid: Optional[datetime] = None
+    deleted: Optional[bool] = None
+
+
+class InvoiceGroupListResponse(BaseModel):
+    """Schema for invoice group list response."""
+
+    data: list[InvoiceGroupResponse]
+    pagination: Pagination
+
+
+class InvoiceGroupDetailResponse(BaseModel):
+    """Schema for single invoice group detail response."""
+
+    data: InvoiceGroupResponse
+    invoices: Optional[list[InvoiceResponse]] = Field(
+        None, description="List of invoices in this group"
+    )
+
+
+class InvoiceGroupFilterParams(BaseModel):
+    """Query parameters for filtering invoice groups."""
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    status: Optional[str] = None
+    companyid: Optional[str] = None
+    invoice_date_from: Optional[datetime] = None
+    invoice_date_to: Optional[datetime] = None
+    due_date_from: Optional[datetime] = None
+    due_date_to: Optional[datetime] = None
+    currency: Optional[str] = None
+    page: int = Field(default=1, ge=1)
+    page_size: int = Field(default=25, ge=1, le=100)
+    sort_by: Optional[str] = Field(default="invoice_date")
+    sort_order: Optional[str] = Field(default="desc", pattern="^(asc|desc)$")
+
+
+class AddInvoiceToGroupRequest(BaseModel):
+    """Schema for adding an invoice to a group."""
+
+    invoice_uuid: str = Field(..., description="Invoice UUID to add to group")
+
+
+class RemoveInvoiceFromGroupRequest(BaseModel):
+    """Schema for removing an invoice from a group."""
+
+    invoice_uuid: str = Field(..., description="Invoice UUID to remove from group")

@@ -13,6 +13,7 @@ from .config import Environment, config, domains
 from .example.router import router as example_router
 from .health.router import router as health_router
 from .invoices.router import router as invoices_router
+from .salesorders.router import router as salesorders_router
 from .middleware import custom_validation_exception_handler
 
 
@@ -47,6 +48,7 @@ app.add_middleware(
 app.include_router(health_router, prefix="/health", tags=["health"])
 app.include_router(example_router, prefix="/example", tags=["example"])
 app.include_router(invoices_router, prefix="/v1", tags=["invoices"])
+app.include_router(salesorders_router, prefix="/v1", tags=["sales-orders"])
 
 # Configure Elastic APM
 if config.elastic_apm_server_url and ELASTIC_APM_AVAILABLE:
